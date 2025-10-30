@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MCP Weather AI</title>
+    <style>
+        body { font-family: Arial; background: #111; color: white; text-align: center; padding: 20px; }
+        #chat { height: 400px; overflow-y: scroll; border: 1px solid #444; padding: 10px; margin: 20px auto; width: 80%; background: #222; }
+        input { width: 70%; padding: 10px; }
+        button { padding: 10px 20px; }
+        .user { color: skyblue; text-align: right; }
+        .ai { color: lightgreen; text-align: left; }
+    </style>
+</head>
+<body>
+    <h1>MCP Weather AI</h1>
+    <div id="chat"></div>
+    <input id="input" placeholder="Type hi or weather in paris">
+    <button onclick="send()">Send</button>
+
+    <script>
+        const chat = document.getElementById('chat');
+        const input = document.getElementById('input');
+        function add(msg, type) {
+            const div = document.createElement('div');
+            div.textContent = (type === 'user' ? 'You: ' : 'AI: ') + msg;
+            div.className = type;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+        async function send() {
+            const msg = input.value.trim();
+            if (!msg) return;
+            add(msg, 'user');
+            input.value = '';
+            try {
+                const res = await fetch('/api', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({message: msg})
+                });
+                const data = await res.json();
+                add(data.response, 'ai');
+            } catch (e) {
+                add('Error: ' + e.message, 'ai');
+            }
+        }
+        add('Hi! Type something!', 'ai');
+    </script>
+</body>
+</html>
